@@ -110,4 +110,4 @@ def _armijo(obj_fun, x, s, c=1e-4):
         alpha0 = alpha1
         alpha1 = alpha2
 
-    return 0.001
+    return 0.0001
