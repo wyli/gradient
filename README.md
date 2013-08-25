@@ -1,2 +1,4 @@
 gradient
 ========
+
+optimisation practices
