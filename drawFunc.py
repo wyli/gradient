@@ -4,8 +4,8 @@ from func import *
 
 def draw(f_x):
 # allocate grids
-    dx = np.arange(-1.5, 1.5, .02)
-    dy = np.arange(-0.5, 1.5, .02)
+    dx = np.arange(-2.0, 1.5, .02)
+    dy = np.arange(-4.5, 3.5, .02)
     X, Y = np.meshgrid(dx, dy)
 
 # eval function f_x
@@ -15,5 +15,6 @@ def draw(f_x):
     Z = Z.reshape(np.shape(X))
 
 # take this pencil
-    cs = plt.contour(X, Y, Z, 20, colors='k')
-    plt.clabel(cs, inline=1)
+    levels = [0.0, 1, 2, 5, 20, 30, 50, 80, 100, 200, 400]
+    cs = plt.contour(X, Y, Z, levels, colors='k')
+    plt.clabel(cs, fmt='%.1f', inline=1)

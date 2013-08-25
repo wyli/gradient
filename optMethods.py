@@ -22,13 +22,13 @@ def newton(start_point, obj_fun, modified=0, iterations=5):
 
     return track
 
-def quasi_newton(start_point, obj_fun, iteration=10, interpolation=0):
+def BFGS(start_point, obj_fun, iteration=10, interpolation=0):
 # with first order information
     x = start_point
     track = x
 
     k = 0
-    H = np.matrix([[1, 0], [0, 1]])
+    H = np.matrix([[.1, 0], [0, .1]])
 
     while k < iteration:
 
@@ -37,15 +37,52 @@ def quasi_newton(start_point, obj_fun, iteration=10, interpolation=0):
         if interpolation > 0:
             alpha_k = _backtracking_line_search(obj_fun, x, s)
         else:
-            alpha_k = _armijo(obj_fun, x, s)
+            alpha_k = _armijo_line_search(obj_fun, x, s)
 
-        delta_k = alpha_k * s
-        x_k_1 = x + delta_k
+        delta = alpha_k * s
+        x_k_1 = x + delta
 
-        gamma_k = obj_fun.g_x(x_k_1) - obj_fun.g_x(x)
-        u = delta_k - np.dot(H, gamma_k)
+        gamma = obj_fun.g_x(x_k_1) - obj_fun.g_x(x)
+        delta_T_gamma = np.dot(delta.T, gamma)
+        gamma_T_H_gamma = np.dot(np.dot(gamma.T, H), gamma)
+        delta_delta_T = np.dot(delta, delta.T)
 
-        scale_a = np.dot(u.T, gamma_k)
+        H = H + (1 + gamma_T_H_gamma/delta_T_gamma) *\
+                (delta_delta_T / delta_T_gamma)
+
+        delta_gamma_H = np.dot(np.dot(delta,delta.T), H)
+        H_gamma_delta_T = np.dot(np.dot(H, gamma), delta.T)
+        H = H - (delta_gamma_H + H_gamma_delta_T) / delta_T_gamma
+
+        track = np.concatenate((track, x), axis=1)
+        x = x_k_1
+        k += 1
+
+    return track
+def quasi_newton(start_point, obj_fun, iteration=10, interpolation=0):
+# with first order information
+    x = start_point
+    track = x
+
+    k = 0
+    H = np.matrix([[.1, 0], [0, .1]])
+
+    while k < iteration:
+
+        s = -1.0 * np.dot(H, obj_fun.g_x(x))
+
+        if interpolation > 0:
+            alpha_k = _backtracking_line_search(obj_fun, x, s)
+        else:
+            alpha_k = _armijo_line_search(obj_fun, x, s)
+
+        delta = alpha_k * s
+        x_k_1 = x + delta
+
+        gamma = obj_fun.g_x(x_k_1) - obj_fun.g_x(x)
+        u = delta - np.dot(H, gamma)
+
+        scale_a = np.dot(u.T, gamma)
         if scale_a == 0: # :(
             scale_a = 0.000001
         H = H + np.dot(u, u.T) / scale_a
@@ -59,7 +96,7 @@ def quasi_newton(start_point, obj_fun, iteration=10, interpolation=0):
 def _backtracking_line_search(obj_fun, x, s, c=1e-4):
 # dummy
     alpha = 1.0
-    p = 0.8 # magic number
+    p = 0.5 # magic number
     c = 0.0001
     diff = 1
 
@@ -74,8 +111,8 @@ def _backtracking_line_search(obj_fun, x, s, c=1e-4):
     return alpha
 
 
-def _armijo(obj_fun, x, s, c=1e-4):
-
+def _armijo_line_search(obj_fun, x, s, c=1e-4):
+# adapted from scipy.optimisation
     alpha0 = 1.0
     amin = 0.0
     f_alpha = obj_fun.about_alpha(x, s)
