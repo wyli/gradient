@@ -1,7 +1,6 @@
 import numpy as np
 
-def newton(start_point, obj_fun, modified=0, iterations=10):
-
+def newton(start_point, obj_fun, modified=0, iterations=1):
 # with second order information
     x = start_point
     track = x
@@ -24,7 +23,6 @@ def newton(start_point, obj_fun, modified=0, iterations=10):
     return track
 
 def quasi_newton(start_point, obj_fun, iteration=10):
-
 # with first order information
     x = start_point
     track = x
@@ -54,17 +52,57 @@ def quasi_newton(start_point, obj_fun, iteration=10):
 
     return track
 
-def _backtracking_line_search(obj_fun, x, s):
+def _backtracking_line_search(obj_fun, x, s, c=1e-4):
+# dummy
     alpha = 1.0
     p = 0.86 # magic number
     c = 0.0001
     diff = 1
 
+    f_alpha = obj_fun.about_alpha(x, s)
+    g_alpha = obj_fun.about_alpha_prime(x, s)
     i = 0
-    while (diff > 0 & i < 10000):
-        f = obj_fun.f_x(x + alpha * s)
+    while (diff > 0 and i < 30):
         f_x = obj_fun.f_x(x)
-        diff = f - f_x - c * alpha * np.dot(obj_fun.g_x(x).T, s)
+        diff = f_alpha(alpha) - f_alpha(0) - c * alpha * g_alpha(0)
         alpha *= p
         i += 1
     return alpha
+
+
+def _armijo(obj_fun, x, s, c=1e-4):
+
+    alpha0 = 1.0
+    amin = 0.0
+    f_alpha = obj_fun.about_alpha(x, s)
+    g_alpha = obj_fun.about_alpha_prime(x, s)
+
+    if(f_alpha(alpha0) <= f_alpha(0) + c * alpha0 * g_alpha(0)):
+        return alpha
+
+    alpha1 = -(g_alpha(0)) * alpha0**2 / \
+            2.0 / (f_alpha(alpha0) - f_alpha(0) - g_alpha(0) * alpha0)
+    if(f_alpha(alpha1) <= f_alpha(0) + c * alpha1 * g_alpha(0)):
+        return alpha1
+
+    while alpha1 > amin:
+
+        factor = alpha0**2 * alpha1**2 * (alpha1 - alpha0)
+        a = alpha0**2 * (f_alpha(alpha1) - f_alpha(0) - g_alpha(0) * alpha1) - \
+            alpha1**2 * (f_alpha(alpha0) - f_alpha(0) - g_alpha(0) * alpha0)
+        a = a / factor
+
+        b = -alpha0**3 * (f_alpha(alpha1) - f_alpha(0) - g_alpha(0) * alpha1)+ \
+            alpha1**3 * (f_alpha(alpha0) - f_alpha(0) - g_alpha(0) * alpha0)
+        b = b / factor
+
+        alpha2 = (-b + np.sqrt(abs(b**2 - 3 * a * g_alpha(0)))) / (3.0 * a)
+        if(f_alpha(alpha2) <= f_alpha(0) + c * alpha2 * g_alpha(0)):
+            return alpha2
+        if(alpha1 - alpha2) > alpha1 / 2.0 or (1 - alpha2/alpha1) < 0.96:
+            alpha2 = alpha1 / 2.0
+
+        alpha0 = alpha1
+        alpha1 = alpha2
+
+    return None

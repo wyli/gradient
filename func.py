@@ -44,3 +44,15 @@ class rosenbrock:
         G21 = -400.0*x[0]
         G22 = 200.0
         return np.matrix([[G11[0,0], G12[0,0]], [G21[0,0], G22]])
+
+    def about_alpha(self, x, s):
+        # f(a) = f(x + a*s) at point x, direction s
+        def along_s(alpha):
+            return self.f_x(x+s*alpha)
+        return along_s
+
+    def about_alpha_prime(self, x, s):
+        def along_s(alpha):
+            p = np.dot(self.g_x(x+alpha*s).T, s)
+            return p[0, 0]
+        return along_s

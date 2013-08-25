@@ -58,12 +58,12 @@ def rosen():
             'o-', linewidth=2.0)
 
     str4 = "Quasi_Newton_Rank_One"
-    track = opt.quasi_newton(start_point, obj, 100)
+    track = opt.quasi_newton(start_point, obj, 500)
     p4, = plt.plot(track[0,:].tolist()[0], track[1,:].tolist()[0],
             'o-', linewidth=2.0)
 
     plt.legend([p1, p2, p3, p4], [str1, str2, str3, str4])
     plt.show()
 
-quadratic()
-#rosen()
+#quadratic()
+rosen()
