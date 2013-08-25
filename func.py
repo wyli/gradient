@@ -31,7 +31,7 @@ class rosenbrock:
         pass
 
     def f_x(self, x):
-        f = 10 * (x[1] - (x[0])**2)**2 + (1-x[0])**2
+        f = 10.0 * (x[1] - (x[0])**2)**2 + (1-x[0])**2
         return f[0, 0]
 
     def g_x(self, x):
@@ -40,7 +40,7 @@ class rosenbrock:
         return np.matrix([[g0[0,0]], [g1[0,0]]])
 
     def G_x(self, x):
-        G00 = 120.0 * x[0]**2 - 40.0*x[1] + 2
+        G00 = 120.0 * x[0]**2 - 40.0 * x[1] + 2.0
         G01 = -40.0*x[0]
         G10 = -40.0*x[0]
         G11 = 20.0

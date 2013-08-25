@@ -16,5 +16,6 @@ def draw(f_x):
 
 # take this pencil
     levels = [0.0, 1, 2, 5, 20, 30, 50, 80, 100, 200, 400]
-    cs = plt.contour(X, Y, Z, levels, colors='k')
-    plt.clabel(cs, fmt='%.1f', inline=1)
+    #cs = plt.contour(X, Y, Z, levels, colors='k')
+    cs = plt.contourf(X, Y, Z, 20, cmap=plt.cm.YlGnBu)
+    #plt.clabel(cs, fmt='%.1f', inline=1)

@@ -1,4 +1,5 @@
-import numpy as np
+from numpy import *
+import pdb
 
 def newton(start_point, obj_fun, modified=0, iterations=5):
 # with second order information
@@ -9,15 +10,15 @@ def newton(start_point, obj_fun, modified=0, iterations=5):
     while k < iterations:
 
         if modified > 0:
-            vI = modified * np.matrix([[1, 0], [0, 1]])
-            G_ = np.linalg.inv(obj_fun.G_x(x) + vI) # inverse?
+            vI = modified * matrix([[1, 0], [0, 1]])
+            G_ = linalg.inv(obj_fun.G_x(x) + vI) # inverse?
         else:
-            G_ = np.linalg.inv(obj_fun.G_x(x)) # inverse?
+            G_ = linalg.inv(obj_fun.G_x(x)) # inverse?
         g_ = obj_fun.g_x(x)
-        delta = -1.0 * np.dot(G_, g_)
+        delta = -1.0 * dot(G_, g_)
         x = x + delta
 
-        track = np.concatenate((track, x), axis=1)
+        track = concatenate((track, x), axis=1)
         k += 1
 
     return track
@@ -28,48 +29,47 @@ def BFGS(start_point, obj_fun, iteration=10, interpolation=0):
     track = x
 
     k = 0
-    H = np.matrix([[.1, 0], [0, .1]])
+    #H = dot(obj_fun.g_x(x), obj_fun.g_x(x).T)
+    H = matrix([[.10, .0], [.0, .10]])
+    gamma = 1.0
 
-    while k < iteration:
+    while k < iteration and linalg.norm(gamma) > 1e-10:
 
-        s = -1.0 * np.dot(H, obj_fun.g_x(x))
+        p = -dot(H, obj_fun.g_x(x))
 
         if interpolation > 0:
-            alpha_k = _backtracking_line_search(obj_fun, x, s)
+            alpha_k = _backtracking_line_search(obj_fun, x, p)
         else:
-            alpha_k = _armijo_line_search(obj_fun, x, s)
+            alpha_k = _armijo_line_search(obj_fun, x, p)
 
-        delta = alpha_k * s
-        x_k_1 = x + delta
+        s = alpha_k * p
+        g_k = obj_fun.g_x(x)
+        x = x + alpha_k * p
+        g_k_1 = obj_fun.g_x(x)
 
-        gamma = obj_fun.g_x(x_k_1) - obj_fun.g_x(x)
-        delta_T_gamma = np.dot(delta.T, gamma)
-        gamma_T_H_gamma = np.dot(np.dot(gamma.T, H), gamma)
-        delta_delta_T = np.dot(delta, delta.T)
+        y = g_k_1 - g_k
 
-        H = H + (1 + gamma_T_H_gamma/delta_T_gamma) *\
-                (delta_delta_T / delta_T_gamma)
+        z = dot(H, y)
+        sTy = dot(s.T, y)
+        H += outer(s, s) * (sTy + dot(y.T, z))[0,0]/(sTy**2) \
+                - (outer(z, s) + outer(s, z))/sTy
 
-        delta_gamma_H = np.dot(np.dot(delta,delta.T), H)
-        H_gamma_delta_T = np.dot(np.dot(H, gamma), delta.T)
-        H = H - (delta_gamma_H + H_gamma_delta_T) / delta_T_gamma
-
-        track = np.concatenate((track, x), axis=1)
-        x = x_k_1
+        track = concatenate((track, x), axis=1)
         k += 1
 
     return track
+
 def quasi_newton(start_point, obj_fun, iteration=10, interpolation=0):
 # with first order information
     x = start_point
     track = x
 
     k = 0
-    H = np.matrix([[.1, 0], [0, .1]])
+    H = matrix([[.01, 0], [0, .01]])
 
     while k < iteration:
 
-        s = -1.0 * np.dot(H, obj_fun.g_x(x))
+        s = -1.0 * dot(H, obj_fun.g_x(x))
 
         if interpolation > 0:
             alpha_k = _backtracking_line_search(obj_fun, x, s)
@@ -80,14 +80,14 @@ def quasi_newton(start_point, obj_fun, iteration=10, interpolation=0):
         x_k_1 = x + delta
 
         gamma = obj_fun.g_x(x_k_1) - obj_fun.g_x(x)
-        u = delta - np.dot(H, gamma)
+        u = delta - dot(H, gamma)
 
-        scale_a = np.dot(u.T, gamma)
+        scale_a = dot(u.T, gamma)
         if scale_a == 0: # :(
             scale_a = 0.000001
-        H = H + np.dot(u, u.T) / scale_a
+        H = H + dot(u, u.T) / scale_a
 
-        track = np.concatenate((track, x), axis=1)
+        track = concatenate((track, x), axis=1)
         x = x_k_1
         k += 1
 
@@ -111,9 +111,8 @@ def _backtracking_line_search(obj_fun, x, s, c=1e-4):
     return alpha
 
 
-def _armijo_line_search(obj_fun, x, s, c=1e-4):
+def _armijo_line_search(obj_fun, x, s, c=1e-4, alpha0=1.0):
 # adapted from scipy.optimisation
-    alpha0 = 1.0
     amin = 0.0
     f_alpha = obj_fun.about_alpha(x, s)
     g_alpha = obj_fun.about_alpha_prime(x, s)
@@ -137,7 +136,7 @@ def _armijo_line_search(obj_fun, x, s, c=1e-4):
             alpha1**3 * (f_alpha(alpha0) - f_alpha(0) - g_alpha(0) * alpha0)
         b = b / factor
 
-        alpha2 = (-b + np.sqrt(abs(b**2 - 3 * a * g_alpha(0)))) / (3.0 * a)
+        alpha2 = (-b + sqrt(abs(b**2 - 3 * a * g_alpha(0)))) / (3.0 * a)
         if(f_alpha(alpha2) <= f_alpha(0) + c * alpha2 * g_alpha(0)):
             return alpha2
 
