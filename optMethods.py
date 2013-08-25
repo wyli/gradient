@@ -44,7 +44,7 @@ def quasi_newton(start_point, obj_fun, iteration=10):
         u = delta_k - np.dot(H, gamma_k)
 
         scale_a = np.dot(u.T, gamma_k)
-        if scale_a == 0:
+        if scale_a == 0: # :(
             scale_a = 0.000001
         H = H + np.dot(u, u.T) / scale_a
 
