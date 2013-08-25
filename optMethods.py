@@ -1,6 +1,6 @@
 import numpy as np
 
-def newton(start_point, obj_fun, modified=0, iterations=1):
+def newton(start_point, obj_fun, modified=0, iterations=5):
 # with second order information
     x = start_point
     track = x
@@ -22,7 +22,7 @@ def newton(start_point, obj_fun, modified=0, iterations=1):
 
     return track
 
-def quasi_newton(start_point, obj_fun, iteration=10):
+def quasi_newton(start_point, obj_fun, iteration=10, interpolation=0):
 # with first order information
     x = start_point
     track = x
@@ -34,7 +34,11 @@ def quasi_newton(start_point, obj_fun, iteration=10):
 
         s = -1.0 * np.dot(H, obj_fun.g_x(x))
 
-        alpha_k = _backtracking_line_search(obj_fun, x, s)
+        if interpolation > 0:
+            alpha_k = _backtracking_line_search(obj_fun, x, s)
+        else:
+            alpha_k = _armijo(obj_fun, x, s)
+
         delta_k = alpha_k * s
         x_k_1 = x + delta_k
 
@@ -55,14 +59,14 @@ def quasi_newton(start_point, obj_fun, iteration=10):
 def _backtracking_line_search(obj_fun, x, s, c=1e-4):
 # dummy
     alpha = 1.0
-    p = 0.86 # magic number
+    p = 0.8 # magic number
     c = 0.0001
     diff = 1
 
     f_alpha = obj_fun.about_alpha(x, s)
     g_alpha = obj_fun.about_alpha_prime(x, s)
     i = 0
-    while (diff > 0 and i < 30):
+    while (diff > 0 and i < 50):
         f_x = obj_fun.f_x(x)
         diff = f_alpha(alpha) - f_alpha(0) - c * alpha * g_alpha(0)
         alpha *= p
@@ -78,7 +82,7 @@ def _armijo(obj_fun, x, s, c=1e-4):
     g_alpha = obj_fun.about_alpha_prime(x, s)
 
     if(f_alpha(alpha0) <= f_alpha(0) + c * alpha0 * g_alpha(0)):
-        return alpha
+        return alpha0
 
     alpha1 = -(g_alpha(0)) * alpha0**2 / \
             2.0 / (f_alpha(alpha0) - f_alpha(0) - g_alpha(0) * alpha0)
@@ -99,10 +103,11 @@ def _armijo(obj_fun, x, s, c=1e-4):
         alpha2 = (-b + np.sqrt(abs(b**2 - 3 * a * g_alpha(0)))) / (3.0 * a)
         if(f_alpha(alpha2) <= f_alpha(0) + c * alpha2 * g_alpha(0)):
             return alpha2
+
         if(alpha1 - alpha2) > alpha1 / 2.0 or (1 - alpha2/alpha1) < 0.96:
             alpha2 = alpha1 / 2.0
 
         alpha0 = alpha1
         alpha1 = alpha2
 
-    return None
+    return 0.001

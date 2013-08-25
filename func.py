@@ -26,24 +26,25 @@ class quadratic:
 
 class rosenbrock:
 
+# f(x_0, x_1) = 10 * (x_1 - x_0^2)^2 + (x_0 - 1)^2
     def __init__(self):
         pass
 
     def f_x(self, x):
-        f = 100 * (x[1] - (x[0])**2)**2 + (1-x[0])*2
+        f = 10 * (x[1] - (x[0])**2)**2 + (1-x[0])**2
         return f[0, 0]
 
     def g_x(self, x):
-        g1 = -400.0 * (x[0]*x[1] - x[0]**3) - 2.0 + 2.0*x[0]
-        g2 = 200.0 * (x[1] - x[0]**2)
-        return np.matrix([[g1[0,0]], [g2[0,0]]])
+        g0 = -40.0 * (x[0]*x[1] - x[0]**3) - 2.0 + 2.0*x[0]
+        g1 = 20.0 * (x[1] - x[0]**2)
+        return np.matrix([[g0[0,0]], [g1[0,0]]])
 
     def G_x(self, x):
-        G11 = 1200.0*x[0]**2 - 400.0*x[1] + 2
-        G12 = -400.0*x[0]
-        G21 = -400.0*x[0]
-        G22 = 200.0
-        return np.matrix([[G11[0,0], G12[0,0]], [G21[0,0], G22]])
+        G00 = 120.0 * x[0]**2 - 40.0*x[1] + 2
+        G01 = -40.0*x[0]
+        G10 = -40.0*x[0]
+        G11 = 20.0
+        return np.matrix([[G00[0,0], G01[0,0]], [G10[0,0], G11]])
 
     def about_alpha(self, x, s):
         # f(a) = f(x + a*s) at point x, direction s

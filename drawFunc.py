@@ -4,8 +4,8 @@ from func import *
 
 def draw(f_x):
 # allocate grids
-    dx = np.arange(-1.5, 2, .02)
-    dy = np.arange(-3.0, 3.5, .02)
+    dx = np.arange(-1.5, 1.5, .02)
+    dy = np.arange(-0.5, 1.5, .02)
     X, Y = np.meshgrid(dx, dy)
 
 # eval function f_x

@@ -32,9 +32,10 @@ def rosen():
     obj = func.rosenbrock()
 
     plt.figure()
+
     drawFunc.draw(obj.f_x)
-    start_point = np.matrix([[-1.0], [2.0]])
-    plt.annotate('Start', xy=(-1, 2), xytext=(-1.2, 2.2),
+    start_point = np.matrix([[-1.5], [1.0]])
+    plt.annotate('Start', xy=(-1.5, 1.0), xytext=(-1.2, 1.2),
             arrowprops=dict(facecolor='black', shrink=0.05))
     plt.annotate('Optimal', xy=(1, 1), xytext=(0.5, 1.2),
             arrowprops=dict(facecolor='black', shrink=0.05))
@@ -57,12 +58,17 @@ def rosen():
     p3, = plt.plot(track[0,:].tolist()[0], track[1,:].tolist()[0],
             'o-', linewidth=2.0)
 
-    str4 = "Quasi_Newton_Rank_One"
-    track = opt.quasi_newton(start_point, obj, 500)
+    str4 = "Quasi_Newton_Dummy_line"
+    track = opt.quasi_newton(start_point, obj, 150, 1)
     p4, = plt.plot(track[0,:].tolist()[0], track[1,:].tolist()[0],
             'o-', linewidth=2.0)
 
-    plt.legend([p1, p2, p3, p4], [str1, str2, str3, str4])
+    str5 = "Quasi_Newton_Armijo"
+    track = opt.quasi_newton(start_point, obj, 150, 0)
+    p5, = plt.plot(track[0,:].tolist()[0], track[1,:].tolist()[0],
+            'o-', linewidth=2.0)
+
+    plt.legend([p1, p2, p3, p4, p5], [str1, str2, str3, str4, str5])
     plt.show()
 
 #quadratic()
