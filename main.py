@@ -68,15 +68,32 @@ def rosen():
     p5, = plt.plot(track[0,:].tolist()[0], track[1,:].tolist()[0],
             'o-', linewidth=2.0)
 
-    str6 = "BFGS_Armijo"
-    track = opt.BFGS(start_point, obj, 350, 0)
+    str6 = "BFGS_trivial"
+    track = opt.BFGS(start_point, obj, 350, 1)
     p6, = plt.plot(track[0,:].tolist()[0], track[1,:].tolist()[0],
             'o-', linewidth=2.0)
 
+    str7 = "BFGS_Armijo"
+    track = opt.BFGS(start_point, obj, 350, 0)
+    p7, = plt.plot(track[0,:].tolist()[0], track[1,:].tolist()[0],
+            'o-', linewidth=2.0)
+
+    v = 0.001
+    str8 = "CG_FR_%.5f"%v
+    track = opt.fletcher_reeves(start_point, obj, iteration=30, alpha=v)
+    p8, = plt.plot(track[0,:].tolist()[0], track[1,:].tolist()[0],
+            'o-', linewidth=2.0)
+
+    v = 0.01
+    str9 = "CG_FR_%.5f"%v
+    track = opt.fletcher_reeves(start_point, obj, iteration=30, alpha=v)
+    p9, = plt.plot(track[0,:].tolist()[0], track[1,:].tolist()[0],
+            'o-', linewidth=2.0)
     #plt.legend([p1, p2, p3, p4, p5, p6, p7],\
     #        [str1, str2, str3, str4, str5, str6, str7])
-    plt.legend([p2, p3, p4, p5, p6],\
-            [str2, str3, str4, str5, str6])
+
+    plt.legend([p2, p3, p4, p5, p6, p7, p8, p9],\
+            [str2, str3, str4, str5, str6, str7, str8, str9])
     plt.show()
 
 #quadratic()

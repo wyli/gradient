@@ -30,7 +30,7 @@ def BFGS(start_point, obj_fun, iteration=10, interpolation=0):
 
     k = 0
     #H = dot(obj_fun.g_x(x), obj_fun.g_x(x).T)
-    H = matrix([[.10, .0], [.0, .10]])
+    H = 1.0*eye(2)
     gamma = 1.0
 
     while k < iteration and linalg.norm(gamma) > 1e-10:
@@ -51,8 +51,9 @@ def BFGS(start_point, obj_fun, iteration=10, interpolation=0):
 
         z = dot(H, y)
         sTy = dot(s.T, y)
-        H += outer(s, s) * (sTy + dot(y.T, z))[0,0]/(sTy**2) \
-                - (outer(z, s) + outer(s, z))/sTy
+        if sTy > 0:
+            H += outer(s, s) * (sTy + dot(y.T, z))[0,0]/(sTy**2) \
+                    - (outer(z, s) + outer(s, z))/sTy
 
         track = concatenate((track, x), axis=1)
         k += 1
@@ -65,7 +66,8 @@ def quasi_newton(start_point, obj_fun, iteration=10, interpolation=0):
     track = x
 
     k = 0
-    H = matrix([[.01, 0], [0, .01]])
+    #H = matrix([[.01, 0], [0, .01]])
+    H = 1.0*eye(2)
 
     while k < iteration:
 
@@ -85,10 +87,37 @@ def quasi_newton(start_point, obj_fun, iteration=10, interpolation=0):
         scale_a = dot(u.T, gamma)
         if scale_a == 0: # :(
             scale_a = 0.000001
-        H = H + dot(u, u.T) / scale_a
+        H = H + outer(u, u) / scale_a
 
         track = concatenate((track, x), axis=1)
         x = x_k_1
+        k += 1
+
+    return track
+
+def fletcher_reeves(start_point, obj_fun, iteration=10, alpha=0.1):
+    x = start_point
+    track = x
+
+    k = 0
+    while k < iteration:
+
+        if k < 1:
+            g = obj_fun.g_x(x)
+            beta = 0.0
+            s = -g
+        else:
+            g = obj_fun.g_x(x)
+
+            beta = dot(g.T, g)/dot(g_old.T, g_old)
+            beta = beta[0,0]
+
+        s = -g + beta * s
+        alpha_k = _armijo_line_search(obj_fun, x, s, alpha0=alpha)
+        g_old = obj_fun.g_x(x)
+        x = x + alpha_k * s
+
+        track = concatenate((track, x), axis=1)
         k += 1
 
     return track
