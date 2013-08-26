@@ -1,5 +1,6 @@
 from numpy import *
-import pdb
+
+# TODO: convergence check
 
 def newton(start_point, obj_fun, modified=0, iterations=5):
 # with second order information
