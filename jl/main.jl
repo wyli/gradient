@@ -4,7 +4,7 @@ using OptMethods
 using PyCall
 @pyimport matplotlib.pyplot as plt
 
-plt.figure()
+plt.figure(TargetFunction.rosenbrock.name)
 DrawFunc.draw2D(TargetFunction.rosenbrock)
 plt.annotate("optimal", xy = (1.0, 1.0), xytext=(1.0, 1.0))
 

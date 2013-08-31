@@ -60,6 +60,4 @@ function _backtracking_line_search(fun::TargetFunction.ObjFun, x, s, c=1e-4)
     return alpha
 end
 
-function Fletcher_Reeves()
-end
 end
